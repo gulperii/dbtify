@@ -1,10 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 </head>
-<body>
+<body class="loggedin">
+<nav class="navtop">
+    <div>
+        <h1>DBtify</h1>
+        <a href="{{ url_for('home_listener') }}"><i class="fas fa-home"></i>Home</a>
+        <a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i>Profile</a>
+        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    </div>
 
+</nav>
+
+<div class="content">
+    <h2>Home Page</h2>
+    <p>Welcome back, {{ username }}!</p>
+    <div class="vertical-menu">
+        <style>
+.vertical-menu {
+  width: 200px; /* Set a width if you like */
+}
+
+.vertical-menu a {
+  background-color: #4a6bee; /* Grey background color */
+  color: #ffffff; /* Black text color */
+  display: block; /* Make the links appear below each other */
+  padding: 12px; /* Add some padding */
+  text-decoration: none; /* Remove underline from links */
+}
+
+.vertical-menu a:hover {
+  background-color: #83b6cc; /* Dark grey background on mouse-over */
+}
+
+.vertical-menu a.active {
+  background-color: #8693af; /* Add a green color to the "active/current" link */
+  color: white;
+}
+</style>
+        <a href="{{ url_for('show_all_songs') }}">All songs</a>
+          <a href="{{ url_for('show_all_artists') }}">All artists</a>
+        <a href="{{ url_for('show_all_albums') }}">All albums</a>
+        <a href="{{ url_for('home_listener') }}">My liked songs</a>
+        <a href="{{ url_for('home_listener') }}">Popular artists</a>
+        <a href="{{ url_for('search_album') }}">Show Album's songs</a>
+          <a href="{{ url_for('search_by_genre') }}">Search a song by genre</a>
+        <a href="{{ url_for('show_all_albums') }}">Search a song by keyword</a>
+        <a href="{{ url_for('home_listener') }}">Show Artist Details</a>
+
+</div>
+</div>
 </body>
 </html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+
+
+<head>
+		<meta charset="utf-8">
+		<title>Showing All</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    <h2>All Albums</h2>
+<p>Showing all albums in database</p>
+	</head>
+
+<body>
+<table border="" cellpadding="5" cellspacing="5">
+
+    <td>Album Name</td>
+    <td>Artist</td>
+    {% for item in data %}
+<tr>
+    <td>{{item['title']}}</td>
+    <td>{{item['artist_id']}}</td>
+    ...
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>
