@@ -157,7 +157,6 @@ def show_all_songs_in_album(album_id):
 
 
 def show_liked_songs(listener_id)
-def show_by_genre(genre)
 def show_by_keyword()
 def show_popular_artists()
 
@@ -211,6 +210,20 @@ def search_by_genre():
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect album genre!'
     return render_template('listener_genre_search.html', msg=msg)
+
+@app.route('/dbtify/search_by_keyword', methods=['GET', 'POST'])
+def search_by_keyword():
+    msg = "Please enter msg id"
+    if request.method == 'POST' and 'keyword' in request.form:
+        keyword= request.form['keyword']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        m_keyword = "%"+keyword+"%"
+        cursor.execute("SELECT title, no_of_likes FROM songs WHERE title LIKE %s;",(m_keyword,))
+        data = cursor.fetchall()
+        cursor.close()
+        return render_template('listener_keyword_page.html', data=data, keyword=keyword)
+
+    return render_template('listener_keyword_search.html', msg=msg)
 
 @app.route('/dbtify/profile')
 def profile():
