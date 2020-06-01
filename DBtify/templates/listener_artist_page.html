@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+<body class="loggedin">
+<nav class="navtop">
+    <div>
+        <h1>DBtify</h1>
+        <a href="{{ url_for('home_listener') }}"><i class="fas fa-home"></i>Home</a>
+        <a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i>Profile</a>
+        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    </div>
+
+</nav>
+
+<meta charset="utf-8">
+<title>Showing All Songs in {{album}}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</body>
+
+</head>
+
+<body>
+<style>
+.body h2 {
+  	margin: 0;
+  	padding: 25px 0;
+  	font-size: 22px;
+  	border-bottom: 1px solid #e0e0e3;
+  	color: #4a536e;
+}
+    .body > p table td, .body > div table td {
+	padding: 5px;
+}
+.body > p table td:first-child, .body > div table td:first-child {
+	font-weight: bold;
+	color: #4a536e;
+	padding-right: 15px;
+}
+.body > div p {
+	padding: 5px;
+	margin: 0 0 10px 0;
+}
+</style>
+<h2>Artist Details Page</h2>
+<p>Showing All Songs of {{artist}}!</p>
+<table border="" cellpadding="5" cellspacing="5">
+
+    <td>Song Name</td>
+    <td>Number of Likes</td>
+    {% for item in songs %}
+    <tr>
+        <td>{{item['title']}}</td>
+        <td>{{item['no_of_likes']}}</td>
+        ...
+    </tr>
+    {% endfor %}
+</table>
+<p>Showing All Albums of {{artist}}!</p>
+<table border="" cellpadding="5" cellspacing="5">
+
+    <td>Album Name</td>
+    <td>Genre</td>
+
+    {% for item in albums %}
+    <tr>
+        <td>{{item['id']}}</td>
+        <td>{{item['genre']}}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

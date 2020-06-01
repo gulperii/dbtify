@@ -3,14 +3,32 @@
 
 
 <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+<body class="loggedin">
+<nav class="navtop">
+    <div>
+        <h1>DBtify</h1>
+        <a href="{{ url_for('home_listener') }}"><i class="fas fa-home"></i>Home</a>
+        <a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i>Profile</a>
+        <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    </div>
+
+</nav>
+
 		<meta charset="utf-8">
-		<title>Showing All Songs with {{keyword}}</title>
+		<title>Showing All Songs in {{album}}</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</body>
 
 	</head>
 
 <body>
+<h2>Keyword Page</h2>
+    <p>Showing All Songs with {{keyword}}!</p>
 <table border="" cellpadding="5" cellspacing="5">
 
     <td>Song Name</td>

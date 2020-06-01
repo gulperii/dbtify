@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Artist Search</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+	</head>
+	<body>
+		<div class="login">
+			<h1>Artist Search</h1>
+
+			<form action="{{ url_for('search_artist') }}" method="post">
+				<label for="artist_id">
+					<i class="fas fa-user"></i>
+				</label>
+				<input type="text" name="artist_id" placeholder="Artist Id" id="artist_id" required>
+				<div class="msg">Enter Artist Id <div>
+				<input type="submit" value="Login">
+			</form>
+		</div>
+	</body>
+</html>

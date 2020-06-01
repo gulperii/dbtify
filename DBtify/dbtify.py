@@ -143,30 +143,6 @@ def show_all_albums():
     cursor.close()
     return render_template('all_albums.html', data=data)
 
-'''
-@app.route('/show_all_songs_in_album')
-def show_all_songs_in_album(album_id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON songs.album_id = albums.id;")
-
-    data = cursor.fetchall()
-    cursor.close()
-    print(data)
-    return render_template('listener_album_page.html', data=data, album=album_id)
-   
-
-
-def show_liked_songs(listener_id)
-def show_by_keyword()
-def show_popular_artists()
-
-def show_artist_songs()
-def show_artist_albums()
-def show_artist_tops()
-def show
-def create_album()
-'''
-
 
 @app.route('/dbtify/search_album', methods=['GET', 'POST'])
 def search_album():
@@ -183,11 +159,38 @@ def search_album():
             cursor.execute("SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON songs.album_id = albums.id WHERE songs.album_id = %s;",(album_id,))
             data = cursor.fetchall()
             cursor.close()
-            return render_template('listener_album_page.html', data=data, album=album)
+            return render_template('listener_album_page.html', data=data, album=album['id'])
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect album id!'
     return render_template('listener_album_search.html', msg=msg)
+
+@app.route('/dbtify/search_artist', methods=['GET', 'POST'])
+def search_artist():
+    msg = "Please enter msg id"
+    if request.method == 'POST' and 'artist_id' in request.form:
+        artist_id = request.form['artist_id']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM artists WHERE id = %s', (artist_id,))
+        # Fetch one record and return result
+        artist = cursor.fetchone()
+        cursor.close()
+        if artist:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT albums.id, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",(artist_id,))
+            albums = cursor.fetchall()
+            print(albums)
+            cursor.close()
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT songs.title,songs.no_of_likes, albums.title FROM songs JOIN albums ON albums.id = songs.album_id JOIN artists ON artists.id = albums.artist_id WHERE artist_id = %s;", (artist_id,))
+            songs = cursor.fetchall()
+            print(songs)
+            cursor.close()
+            return render_template('listener_artist_page.html', albums=albums, songs=songs,artist=artist['name']+" "+ artist['surname'])
+        else:
+            # Account doesnt exist or username/password incorrect
+            msg = 'Incorrect album id!'
+    return render_template('listener_artist_search.html', msg=msg)
 
 @app.route('/dbtify/search_by_genre', methods=['GET', 'POST'])
 def search_by_genre():
