@@ -10,7 +10,7 @@
 <nav class="navtop">
     <div>
         <h1>DBtify</h1>
-        <a href="{{ url_for('home_listener') }}"><i class="fas fa-home"></i>Home</a>
+        <a href="{{ url_for('home_artist') }}"><i class="fas fa-home"></i>Home</a>
         <a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i>Profile</a>
         <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
     </div>
@@ -21,13 +21,50 @@
     <h2>Home Page</h2>
     <p>Welcome back, {{ username }}!</p>
     <div class="vertical-menu">
-        <a href="{{ url_for('show_albums') }}">My Albums</a>
-          <a href="{{ url_for('home_listener') }}">Add Album</a>
-        <a href="{{ url_for('home_listener') }}">Delete Album</a>
-        <a href="{{ url_for('home_listener') }}">My liked songs</a>
-        <a href="{{ url_for('home_listener') }}">Popular artists</a>
+        <style>
+.vertical-menu {
+  width: 200px; /* Set a width if you like */
+}
 
+.vertical-menu a {
+  background-color: #4a6bee; /* Grey background color */
+  color: #ffffff; /* Black text color */
+  display: block; /* Make the links appear below each other */
+  padding: 12px; /* Add some padding */
+  text-decoration: none; /* Remove underline from links */
+}
+
+.vertical-menu a:hover {
+  background-color: #83b6cc; /* Dark grey background on mouse-over */
+}
+
+.vertical-menu a.active {
+  background-color: #8693af; /* Add a green color to the "active/current" link */
+  color: white;
+}
+</style>
+        <a href="{{ url_for('add_album') }}">Add Album</a>
+        <a href="{{ url_for('home_listener') }}">Delete Album</a>
+        <a href="{{ url_for('modify_album') }}">Modify Album</a>
+         <a href="{{ url_for('home_listener') }}">Add Song</a>
+        <a href="{{ url_for('home_listener') }}">Delete Song</a>
+        <a href="{{ url_for('home_listener') }}">Modify Song</a>
+
+    </div>
+    <table border="" cellpadding="5" cellspacing="5">
+
+    <td>Album Name</td>
+    <td>Genre</td>
+
+    {% for item in albums %}
+    <tr>
+        <td>{{item['id']}}</td>
+        <td>{{item['genre']}}</td>
+
+    </tr>
+    {% endfor %}
+</table>
 </div>
-</div>
+
 </body>
 </html>

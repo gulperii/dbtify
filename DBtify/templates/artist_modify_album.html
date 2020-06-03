@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Modify Album</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+	</head>
+	<body>
+		<div class="login">
+			<h1>Modify Album</h1>
+
+			<form action="{{ url_for('modify_album') }}" method="post">
+				<label for="album_id">
+					<i class="fas fa-user"></i>
+				</label>
+				<input type="text" name="album_id" placeholder="Album Id" id="album_id" required>
+
+                <label for="album_title">
+					<i class="fas fa-user"></i>
+				</label>
+				<input type="text" name="album_title" placeholder="Album Title" id="album_title" required>
+
+                <label for="genre">
+					<i class="fas fa-user"></i>
+				</label>
+				<input type="text" name="genre" placeholder="Genre" id="genre" required>
+
+				<div class="msg">{{msg}}</div>
+				<input type="submit" value="Modify Album">
+			</form>
+		</div>
+	</body>
+</html>

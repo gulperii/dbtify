@@ -73,7 +73,7 @@ def login_artist():
         if account:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
-            session['username'] = account['name']
+            session['username'] = account['id']
             session['permission'] = 1
             # Redirect to home page
             # return 'Logged in successfully!'
@@ -112,7 +112,13 @@ def home_artist():
     if 'loggedin' in session:
         # User is loggedin show them the home page
         # return render_template('home.html', username=session['username'])
-        return render_template('home_artist.html', username=session['username'])
+        artist_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT albums.id, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",(artist_id,))
+        albums = cursor.fetchall()
+        print(albums)
+        cursor.close()
+        return render_template('home_artist.html', username=session['username'],albums = albums)
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
@@ -235,13 +241,14 @@ def profile():
         if session['permission'] == 0:
             # We need all the account info for the user so we can display it on the profile page
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM listener WHERE username = %s', (session['username'],))
+            cursor.execute('SELECT * FROM listeners WHERE username = %s', (session['username'],))
             account = cursor.fetchone()
             # Show the profile page with account info
             return render_template('profile.html', account=account)
         elif session['permission'] == 1:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM artist WHERE name = %s', (session['username'],))
+            #TODO: sıkıntı çıkacak
+            cursor.execute('SELECT * FROM artists WHERE name = %s', (session['username'],))
             account = cursor.fetchone()
             return render_template('profile.html', account=account)
 
@@ -249,49 +256,49 @@ def profile():
 
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+@app.route('/dbtify/add_album', methods=['GET', 'POST'])
+def add_album():
+    msg = "Please enter msg id"
+    if request.method == 'POST' and 'album_id' in request.form:
+        album_id = request.form['album_id']
+        album_title = request.form['album_title']
+        genre = request.form['genre']
+        artist_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        sql = "INSERT INTO albums (id, genre, title, artist_id) VALUES (%s, %s,%s, %s)"
+        values = (album_id, genre,album_title, artist_id)
+        cursor.execute(sql,values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        return redirect(url_for('home_artist'))
+    else:
+        msg = 'Missing credentails'
+    return render_template('artist_add_album.html', msg=msg)
 
-
-'''
-db = mysql.connect(
-    host = "localhost",
-    user = "root",
-    passwd = "Ezgi9898!"
-)
-except mysql.connector.Error as err:
-  if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-    print("Something is wrong with your user name or password")
-  elif err.errno == errorcode.ER_BAD_DB_ERROR:
-    print("Database does not exist")
-  else:
-    print(err)
-else:
-  cnx.close()
-
-## creating an instance of 'cursor' class which is used to execute the 'SQL' statements in 'Python'
-cursor = db.cursor()
-
-## creating a databse called 'datacamp'
-## 'execute()' method is used to compile a 'SQL' statement
-## below statement is used to create tha 'datacamp' database
-#cursor.execute("CREATE DATABASE dbtify")
-## executing the statement using 'execute()' method
-cursor.execute("SHOW DATABASES")
-
-## 'fetchall()' method fetches all the rows from the last executed statement
-databases = cursor.fetchall() ## it returns a list of all databases present
-
-## printing the list of databases
-print(databases)
-db = mysql.connect(
-    host = "localhost",
-    user = "root",
-    passwd = "Ezgi9898!",
-    database = "datacamp"
-)
-cursor = db.cursor()
-#cursor.execute("CREATE TABLE useri (name VARCHAR(255), user_name VARCHAR(255))")
-cursor.execute("SHOW TABLES")
-
-tables = cursor.fetchall()
-print(tables)
-'''
+#TODO: CHeck if he is the owner
+@app.route('/dbtify/modify_album', methods=['GET', 'POST'])
+def modify_album():
+    msg = "Please enter album details"
+    if request.method == 'POST' and 'album_id' in request.form:
+        album_id = request.form['album_id']
+        album_title = request.form['album_title']
+        genre = request.form['genre']
+        artist_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM albums WHERE id = %s', (album_id,))
+        album = cursor.fetchone()
+        if album['artist_id'] != session['username']:
+            msg = 'This is not your album, you cant change it'
+            return render_template('artist_modify_album.html', msg=msg)
+        else:
+            sql = "UPDATE albums SET title = %s, genre = %s  WHERE id = %s"
+            values = (album_title, genre,album_id)
+            cursor.execute(sql,values)
+            # Fetch one record and return result
+            mysql.connect.commit()
+            mysql.connection.commit()
+            return redirect(url_for('home_artist'))
+    else:
+        msg = "Please enter album details"
+    return render_template('artist_modify_album.html', msg=msg)
