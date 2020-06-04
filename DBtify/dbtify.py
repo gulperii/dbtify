@@ -276,7 +276,81 @@ def add_album():
         msg = 'Missing credentails'
     return render_template('artist_add_album.html', msg=msg)
 
-#TODO: CHeck if he is the owner
+@app.route('/dbtify/add_song', methods=['GET', 'POST'])
+def add_song():
+    msg = "Please enter msg id"
+    if request.method == 'POST' and 'album_id' in request.form:
+        album_id = request.form['album_id']
+        song_title = request.form['song_title']
+        song_id = request.form['song_id']
+        artist_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM albums WHERE id = %s', (album_id,))
+        album = cursor.fetchone()
+        if album['artist_id'] != session['username']:
+            msg = 'This is not your album, you cant add songs to it'
+            return render_template('artist_add_song.html', msg=msg)
+        if 'contributor_name' in request.form and 'contributor_surname' in request.form:
+            contributor_id = request.form['contributor_name'] +request.form['contributor_surname']
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            sql = "INSERT INTO coartists (song_id,album_id, artist_id) VALUES (%s, %s,%s)"
+            values = (song_id, album_id, contributor_id)
+            cursor.execute(sql, values)
+            # Fetch one record and return result
+            mysql.connect.commit()
+            mysql.connection.commit()
+            cursor.close()
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        sql = "INSERT INTO songs (id, title, album_id, no_of_likes) VALUES (%s, %s,%s, %s)"
+        values = (song_id, song_title,album_id, 0)
+        cursor.execute(sql,values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        cursor.close()
+        return redirect(url_for('home_artist'))
+    else:
+        msg = 'Missing credentails'
+    msg = "Enter song details"
+    return render_template('artist_add_song.html', msg=msg)
+
+@app.route('/dbtify/modify_song', methods=['GET', 'POST'])
+def modify_song():
+    if request.method == 'POST' and 'song_id' in request.form:
+        album_id = request.form['album_id']
+        song_title = request.form['song_title']
+        song_id = request.form['song_id']
+        artist_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT artists.id FROM artists JOIN albums ON albums.artist_id = artists.id JOIN songs ON songs.album_id = albums.id WHERE songs.id = %s;",(song_id,))
+        artist = cursor.fetchone()
+        if artist['id'] != session['username']:
+            msg = 'This is not your album, you cant modify songs in it'
+            return render_template('artist_modify_song.html', msg=msg)
+        if 'contributor_name' in request.form and 'contributor_surname' in request.form:
+            contributor_id = request.form['contributor_name'] +request.form['contributor_surname']
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            sql = "UPDATE coartists SET song_title = %s "
+            values = (song_id, album_id, contributor_id)
+            cursor.execute(sql, values)
+            # Fetch one record and return result
+            mysql.connect.commit()
+            mysql.connection.commit()
+            cursor.close()
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        sql = "INSERT INTO songs (id, title, album_id, no_of_likes) VALUES (%s, %s,%s, %s)"
+        values = (song_id, song_title,album_id, 0)
+        cursor.execute(sql,values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        cursor.close()
+        return redirect(url_for('home_artist'))
+    else:
+        msg = 'Missing credentails'
+    msg = "Enter song details"
+    return render_template('artist_add_song.html', msg=msg)
+
 @app.route('/dbtify/modify_album', methods=['GET', 'POST'])
 def modify_album():
     msg = "Please enter album details"

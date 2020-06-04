@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Add Song</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
+<body>
+<div class="login">
+    <h1>Add Song</h1>
+
+    <form action="{{ url_for('add_song') }}" method="post">
+        <label for="album_id">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="album_id" placeholder="Album Id" id="album_id" required>
+
+        <label for="song_title">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="song_title" placeholder="Song Title" id="song_title" required>
+
+        <label for="song_id">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="song_id" placeholder="Song Id" id="song_id" required>
+        <label for="contributor_name">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="contributor_name" placeholder="Contributor Name(if applicable)" id="contributor_name">
+
+        <label for="contributor_surname">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="contributor_surname" placeholder="Contributor Surname(if applicable)" id="contributor_surname">
+        <div class="msg">{{msg}}</div>
+        <input type="submit" value="Create New Song">
+    </form>
+</div>
+</body>
+</html>
