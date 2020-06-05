@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="login">
-    <h1>Add Song</h1>
+    <h1>Modify Song</h1>
 
     <form action="{{ url_for('modify_song') }}" method="post">
         <label for="song_id">
@@ -20,17 +20,6 @@
         </label>
         <input type="text" name="song_title" placeholder="Song Title" id="song_title" required>
 
-
-        <label for="contributor_name">
-            <i class="fas fa-user"></i>
-        </label>
-        <input type="text" name="contributor_name" placeholder="Add Contributor Name(if applicable)" id="contributor_name">
-
-        <label for="contributor_surname">
-            <i class="fas fa-user"></i>
-        </label>
-        <input type="text" name="contributor_surname" placeholder="Add Contributor Surname(if applicable)"
-               id="contributor_surname">
         <div class="msg">{{msg}}</div>
         <input type="submit" value="Modify Song">
     </form>

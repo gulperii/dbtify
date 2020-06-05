@@ -20,7 +20,7 @@
 <div class="content">
     <h2>Home Page</h2>
     <p>Welcome back, {{ username }}!</p>
-    <div class="vertical-menu">
+    <div class="vertical-menu" style="float: left">
         <style>
 .vertical-menu {
   width: 200px; /* Set a width if you like */
@@ -51,14 +51,14 @@
         <a href="{{ url_for('modify_song') }}">Modify Song</a>
 
     </div>
-    <table border="" cellpadding="5" cellspacing="5">
+    <table border="" cellpadding="20" cellspacing="5" style="float: inside">
 
     <td>Album Name</td>
     <td>Genre</td>
 
     {% for item in albums %}
     <tr>
-        <td>{{item['id']}}</td>
+        <td>{{item['title']}}</td>
         <td>{{item['genre']}}</td>
 
     </tr>

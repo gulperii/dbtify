@@ -17,13 +17,13 @@
 
 </nav>
 
-		<meta charset="utf-8">
-		<title>Showing All Songs in {{album}}</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+<meta charset="utf-8">
+<title>Showing All Songs in {{album}}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 </body>
 
-	</head>
+</head>
 
 <body>
 <h2>All Songs</h2>
@@ -33,12 +33,17 @@
     <td>Song Name</td>
     <td>Album Name</td>
     {% for item in data %}
-<tr>
-    <td>{{item['title']}}</td>
-    <td>{{item['album_id']}}</td>
-    ...
-</tr>
-{% endfor %}
+    <tr>
+        <td>{{item['id']}}</td>
+        <td>{{item['title']}}</td>
+        <td>{{item['album_id']}}</td>
+        <td>
+            <form action="/like_song" method="post">
+                <button name= "likebtn" id="likebtn" value = "{{item['id']}}" type="submit">Like</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
 </table>
 </body>
 </html>

@@ -108,25 +108,22 @@ def home_listener():
 
 @app.route('/homeartist')
 def home_artist():
-    # Check if user is loggedin
     if 'loggedin' in session:
-        # User is loggedin show them the home page
-        # return render_template('home.html', username=session['username'])
         artist_id = session['username']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT albums.id, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",(artist_id,))
+        cursor.execute(
+            "SELECT albums.title, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",
+            (artist_id,))
         albums = cursor.fetchall()
-        print(albums)
         cursor.close()
-        return render_template('home_artist.html', username=session['username'],albums = albums)
-    # User is not loggedin redirect to login page
+        return render_template('home_artist.html', username=session['username'], albums=albums)
     return redirect(url_for('login'))
 
 
 @app.route('/show_all_songs')
 def show_all_songs():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT title, album_id FROM songs")
+    cursor.execute("SELECT title, album_id, id FROM songs")
     data = cursor.fetchall()
     cursor.close()
     return render_template('all_songs.html', data=data)
@@ -162,7 +159,9 @@ def search_album():
         cursor.close()
         if album:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON songs.album_id = albums.id WHERE songs.album_id = %s;",(album_id,))
+            cursor.execute(
+                "SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON songs.album_id = albums.id WHERE songs.album_id = %s;",
+                (album_id,))
             data = cursor.fetchall()
             cursor.close()
             return render_template('listener_album_page.html', data=data, album=album['id'])
@@ -170,6 +169,7 @@ def search_album():
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect album id!'
     return render_template('listener_album_search.html', msg=msg)
+
 
 @app.route('/dbtify/search_artist', methods=['GET', 'POST'])
 def search_artist():
@@ -183,56 +183,57 @@ def search_artist():
         cursor.close()
         if artist:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT albums.id, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",(artist_id,))
+            cursor.execute(
+                "SELECT albums.id, albums.genre FROM albums INNER JOIN artists ON albums.artist_id= artists.id WHERE artists.id = %s;",
+                (artist_id,))
             albums = cursor.fetchall()
-            print(albums)
             cursor.close()
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT songs.title,songs.no_of_likes, albums.title FROM songs JOIN albums ON albums.id = songs.album_id JOIN artists ON artists.id = albums.artist_id WHERE artist_id = %s;", (artist_id,))
+            cursor.execute(
+                "SELECT songs.title,songs.no_of_likes, albums.title FROM songs JOIN albums ON albums.id = songs.album_id JOIN artists ON artists.id = albums.artist_id WHERE artist_id = %s;",
+                (artist_id,))
             songs = cursor.fetchall()
-            print(songs)
             cursor.close()
-            return render_template('listener_artist_page.html', albums=albums, songs=songs,artist=artist['name']+" "+ artist['surname'])
+            return render_template('listener_artist_page.html', albums=albums, songs=songs,
+                                   artist=artist['name'] + " " + artist['surname'])
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect album id!'
     return render_template('listener_artist_search.html', msg=msg)
+
 
 @app.route('/dbtify/search_by_genre', methods=['GET', 'POST'])
 def search_by_genre():
     msg = "Please enter msg id"
     if request.method == 'POST' and 'genre' in request.form:
         genre_to_search = request.form['genre']
+
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM genres WHERE name = %s', (genre_to_search,))
-        # Fetch one record and return result
-        genre = cursor.fetchone()
+        cursor.execute(
+            "SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON albums.id = songs.album_id WHERE albums.genre = %s;",
+            (genre_to_search,))
+        data = cursor.fetchall()
+        print(data)
         cursor.close()
-        if genre:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT songs.title, songs.no_of_likes FROM songs INNER JOIN albums ON albums.id = songs.album_id WHERE albums.genre = %s;",(genre_to_search,))
-            data = cursor.fetchall()
-            print(data)
-            cursor.close()
-            return render_template('listener_genre_page.html', data=data, genre=genre_to_search)
-        else:
-            # Account doesnt exist or username/password incorrect
-            msg = 'Incorrect album genre!'
+        return render_template('listener_genre_page.html', data=data, genre=genre_to_search)
+
     return render_template('listener_genre_search.html', msg=msg)
+
 
 @app.route('/dbtify/search_by_keyword', methods=['GET', 'POST'])
 def search_by_keyword():
     msg = "Please enter msg id"
     if request.method == 'POST' and 'keyword' in request.form:
-        keyword= request.form['keyword']
+        keyword = request.form['keyword']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        m_keyword = "%"+keyword+"%"
-        cursor.execute("SELECT title, no_of_likes FROM songs WHERE title LIKE %s;",(m_keyword,))
+        m_keyword = "%" + keyword + "%"
+        cursor.execute("SELECT title, no_of_likes FROM songs WHERE title LIKE %s;", (m_keyword,))
         data = cursor.fetchall()
         cursor.close()
         return render_template('listener_keyword_page.html', data=data, keyword=keyword)
 
     return render_template('listener_keyword_search.html', msg=msg)
+
 
 @app.route('/dbtify/profile')
 def profile():
@@ -247,7 +248,7 @@ def profile():
             return render_template('profile.html', account=account)
         elif session['permission'] == 1:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            #TODO: sıkıntı çıkacak
+            # TODO: sıkıntı çıkacak
             cursor.execute('SELECT * FROM artists WHERE name = %s', (session['username'],))
             account = cursor.fetchone()
             return render_template('profile.html', account=account)
@@ -256,9 +257,10 @@ def profile():
 
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
+
+
 @app.route('/dbtify/add_album', methods=['GET', 'POST'])
 def add_album():
-    msg = "Please enter msg id"
     if request.method == 'POST' and 'album_id' in request.form:
         album_id = request.form['album_id']
         album_title = request.form['album_title']
@@ -266,113 +268,138 @@ def add_album():
         artist_id = session['username']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         sql = "INSERT INTO albums (id, genre, title, artist_id) VALUES (%s, %s,%s, %s)"
-        values = (album_id, genre,album_title, artist_id)
-        cursor.execute(sql,values)
-        # Fetch one record and return result
+        values = (album_id, genre, album_title, artist_id)
+        cursor.execute(sql, values)
         mysql.connect.commit()
         mysql.connection.commit()
         return redirect(url_for('home_artist'))
     else:
-        msg = 'Missing credentails'
+        msg = 'Enter album details'
     return render_template('artist_add_album.html', msg=msg)
 
+#TODO: what happens if that the first time you see the contr. add to artist?
 @app.route('/dbtify/add_song', methods=['GET', 'POST'])
 def add_song():
-    msg = "Please enter msg id"
     if request.method == 'POST' and 'album_id' in request.form:
         album_id = request.form['album_id']
         song_title = request.form['song_title']
         song_id = request.form['song_id']
-        artist_id = session['username']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM albums WHERE id = %s', (album_id,))
         album = cursor.fetchone()
-        if album['artist_id'] != session['username']:
+        if not album:
+            msg = "Wrong album id"
+        elif album['artist_id'] != session['username']:
             msg = 'This is not your album, you cant add songs to it'
-            return render_template('artist_add_song.html', msg=msg)
-        if 'contributor_name' in request.form and 'contributor_surname' in request.form:
-            contributor_id = request.form['contributor_name'] +request.form['contributor_surname']
+        else:
+            if 'contributor_name' in request.form and 'contributor_surname' in request.form:
+                contributor_id = request.form['contributor_name'] + request.form['contributor_surname']
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                sql = "INSERT INTO coartists (song_id,album_id, artist_id) VALUES (%s, %s,%s)"
+                values = (song_id, album_id, contributor_id)
+                cursor.execute(sql, values)
+                mysql.connect.commit()
+                mysql.connection.commit()
+                cursor.close()
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            sql = "INSERT INTO coartists (song_id,album_id, artist_id) VALUES (%s, %s,%s)"
-            values = (song_id, album_id, contributor_id)
+            sql = "INSERT INTO songs (id, title, album_id, no_of_likes) VALUES (%s, %s,%s, %s)"
+            values = (song_id, song_title, album_id, 0)
             cursor.execute(sql, values)
-            # Fetch one record and return result
             mysql.connect.commit()
             mysql.connection.commit()
             cursor.close()
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        sql = "INSERT INTO songs (id, title, album_id, no_of_likes) VALUES (%s, %s,%s, %s)"
-        values = (song_id, song_title,album_id, 0)
-        cursor.execute(sql,values)
-        # Fetch one record and return result
-        mysql.connect.commit()
-        mysql.connection.commit()
-        cursor.close()
-        return redirect(url_for('home_artist'))
+            return redirect(url_for('home_artist'))
     else:
-        msg = 'Missing credentails'
-    msg = "Enter song details"
+        msg = "Enter song details"
+
     return render_template('artist_add_song.html', msg=msg)
+
 
 @app.route('/dbtify/modify_song', methods=['GET', 'POST'])
 def modify_song():
     if request.method == 'POST' and 'song_id' in request.form:
-        album_id = request.form['album_id']
         song_title = request.form['song_title']
         song_id = request.form['song_id']
-        artist_id = session['username']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT artists.id FROM artists JOIN albums ON albums.artist_id = artists.id JOIN songs ON songs.album_id = albums.id WHERE songs.id = %s;",(song_id,))
-        artist = cursor.fetchone()
-        if artist['id'] != session['username']:
-            msg = 'This is not your album, you cant modify songs in it'
-            return render_template('artist_modify_song.html', msg=msg)
-        if 'contributor_name' in request.form and 'contributor_surname' in request.form:
-            contributor_id = request.form['contributor_name'] +request.form['contributor_surname']
+        cursor.execute('SELECT * FROM songs WHERE id = %s', (song_id,))
+        song = cursor.fetchone()
+        cursor.close()
+        if song:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            sql = "UPDATE coartists SET song_title = %s "
-            values = (song_id, album_id, contributor_id)
+            cursor.execute(
+                "SELECT artists.id FROM artists JOIN albums ON albums.artist_id = artists.id JOIN songs ON songs.album_id = albums.id WHERE songs.id = %s;",
+                (song_id,))
+            artist = cursor.fetchone()
+            cursor.close()
+            if artist['id'] != session['username']:
+                msg = 'This is not your album, you cant modify songs in it'
+                return render_template('artist_modify_song.html', msg=msg)
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            sql = "UPDATE songs SET title = %s WHERE id = %s"
+            values = (song_title, song_id)
             cursor.execute(sql, values)
             # Fetch one record and return result
             mysql.connect.commit()
             mysql.connection.commit()
             cursor.close()
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        sql = "INSERT INTO songs (id, title, album_id, no_of_likes) VALUES (%s, %s,%s, %s)"
-        values = (song_id, song_title,album_id, 0)
-        cursor.execute(sql,values)
-        # Fetch one record and return result
-        mysql.connect.commit()
-        mysql.connection.commit()
-        cursor.close()
-        return redirect(url_for('home_artist'))
+            return redirect(url_for('home_artist'))
+        else:
+            msg = 'Wrong credentials'
     else:
-        msg = 'Missing credentails'
-    msg = "Enter song details"
-    return render_template('artist_add_song.html', msg=msg)
+        msg = "Enter song details"
+
+    return render_template('artist_modify_song.html', msg=msg)
 
 @app.route('/dbtify/modify_album', methods=['GET', 'POST'])
 def modify_album():
-    msg = "Please enter album details"
     if request.method == 'POST' and 'album_id' in request.form:
         album_id = request.form['album_id']
         album_title = request.form['album_title']
         genre = request.form['genre']
-        artist_id = session['username']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM albums WHERE id = %s', (album_id,))
         album = cursor.fetchone()
-        if album['artist_id'] != session['username']:
+        if not album:
+            msg = "No album exists with this id"
+        elif album['artist_id'] != session['username']:
             msg = 'This is not your album, you cant change it'
-            return render_template('artist_modify_album.html', msg=msg)
         else:
             sql = "UPDATE albums SET title = %s, genre = %s  WHERE id = %s"
-            values = (album_title, genre,album_id)
-            cursor.execute(sql,values)
-            # Fetch one record and return result
+            values = (album_title, genre, album_id)
+            cursor.execute(sql, values)
             mysql.connect.commit()
             mysql.connection.commit()
             return redirect(url_for('home_artist'))
     else:
         msg = "Please enter album details"
     return render_template('artist_modify_album.html', msg=msg)
+
+@app.route('/like_song', methods=['GET', 'POST'])
+def like_song():
+    if request.method == 'POST':
+        song_id = request.form['likebtn']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        sql = "SELECT no_of_likes FROM songs WHERE id= %s"
+        cursor.execute( "SELECT no_of_likes FROM songs WHERE id= %s",(song_id,))
+        old_likes = int(cursor.fetchone()['no_of_likes'])
+        sql = "UPDATE songs SET no_of_likes = %s WHERE id = %s"
+        values = (old_likes+1, song_id)
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        sql = "INSERT INTO user_likes (song_id,user_id) VALUES (%s, %s)"
+
+        values = (song_id, session['username'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        cursor.close()
+
+    return render_template('home_listener.html', username=session['username'])
+
+
+
+
+
