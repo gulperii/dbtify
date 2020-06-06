@@ -18,7 +18,7 @@
 </nav>
 
 <meta charset="utf-8">
-<title>Showing All Songs</title>
+<title>Showing All Listeners</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 </body>
@@ -26,20 +26,17 @@
 </head>
 
 <body>
-<h2>All Songs</h2>
-<p>Showing all songs in database</p>
+<h2>All Listeners</h2>
+<p>Showing all listeners</p>
 <table border="" cellpadding="5" cellspacing="5">
-    <td>Song Id</td>
-    <td>Song Name</td>
-    <td>Album Name</td>
+
+    <td>Username</td>
     {% for item in data %}
     <tr>
-        <td>{{item['id']}}</td>
-        <td>{{item['title']}}</td>
-        <td>{{item['album_id']}}</td>
+        <td>{{item['username']}}</td>
         <td>
-            <form action="/like_song" method="post">
-                <button name= "likebtn" id="likebtn" value = "{{item['id']}}" type="submit">Like</button>
+            <form action="/others_likes" method="post">
+                <button name= "viewbtn" id="viewbtn" value = "{{item['username']}}" type="submit">View Likes</button>
             </form>
         </td>
     </tr>

@@ -20,7 +20,7 @@
 <div class="content">
     <h2>Home Page</h2>
     <p>Welcome back, {{ username }}!</p>
-    <div class="vertical-menu">
+    <div class="vertical-menu" style="float: left">
         <style>
 .vertical-menu {
   width: 200px; /* Set a width if you like */
@@ -49,11 +49,24 @@
         <a href="{{ url_for('search_album') }}">Show Album's songs</a>
           <a href="{{ url_for('search_by_genre') }}">Search a song by genre</a>
         <a href="{{ url_for('search_by_keyword') }}">Search a song by keyword</a>
-        <a href="{{ url_for('home_listener') }}">My liked songs</a>
-        <a href="{{ url_for('home_listener') }}">Popular artists</a>
+        <a href="{{ url_for('show_all_listeners') }}">Other Listeners</a>
+        <a href="{{ url_for('rank_artists') }}">Popular artists</a>
         <a href="{{ url_for('search_artist') }}">Show Artist Details</a>
 
 </div>
+     <table border="" cellpadding="20" cellspacing="5" style="float: inside">
+<h2>My liked songs</h2>
+         <td>Song Title</td>
+    <td>Total Number Of Likes</td>
+
+    {% for item in liked_songs %}
+    <tr>
+        <td>{{item['title']}}</td>
+        <td>{{item['no_of_likes']}}</td>
+
+    </tr>
+    {% endfor %}
+</table>
 </div>
 </body>
 </html>

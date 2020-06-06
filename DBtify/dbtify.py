@@ -99,8 +99,14 @@ def logout():
 def home_listener():
     # Check if user is loggedin
     if 'loggedin' in session:
-        # User is loggedin show them the home page
-        return render_template('home_listener.html', username=session['username'])
+        listener_id = session['username']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            "SELECT songs.title,songs.no_of_likes FROM songs INNER JOIN user_likes ON user_likes.song_id= songs.id WHERE user_likes.user_id = %s;",
+            (listener_id,))
+        liked_songs = cursor.fetchall()
+        cursor.close()
+        return render_template('home_listener.html', username=session['username'], liked_songs=liked_songs)
     # User is not loggedin redirect to login page
     print("i am not logged in")
     return redirect(url_for('login'))
@@ -127,6 +133,15 @@ def show_all_songs():
     data = cursor.fetchall()
     cursor.close()
     return render_template('all_songs.html', data=data)
+
+
+@app.route('/show_all_listeners')
+def show_all_listeners():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT username FROM listeners")
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('all_listeners.html', data=data)
 
 
 @app.route('/show_all_artist')
@@ -189,13 +204,26 @@ def search_artist():
             albums = cursor.fetchall()
             cursor.close()
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            #TODO: ALBUMTITLE????
             cursor.execute(
                 "SELECT songs.title,songs.no_of_likes, albums.title FROM songs JOIN albums ON albums.id = songs.album_id JOIN artists ON artists.id = albums.artist_id WHERE artist_id = %s;",
                 (artist_id,))
             songs = cursor.fetchall()
+
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT songs.title,albums.title, albums.artist_id FROM songs JOIN albums ON albums.id = songs.album_id JOIN coartists ON albums.id = coartists.album_id WHERE coartists.artist_id = %s;",(artist_id,))
+            cosongs = cursor.fetchall()
+
+            cursor.execute(
+                "SELECT songs.title,songs.no_of_likes, albums.title  FROM songs JOIN albums ON albums.id = songs.album_id JOIN artists ON artists.id = albums.artist_id WHERE artist_id = %s  ORDER BY no_of_likes DESC LIMIT 10  ;",
+                (artist_id,))
+            popular_songs = cursor.fetchall()
+
+
+
             cursor.close()
             return render_template('listener_artist_page.html', albums=albums, songs=songs,
-                                   artist=artist['name'] + " " + artist['surname'])
+                                   artist=artist['name'] + " " + artist['surname'],cosongs=cosongs,popular_songs=popular_songs)
         else:
             # Account doesnt exist or username/password incorrect
             msg = 'Incorrect album id!'
@@ -277,7 +305,8 @@ def add_album():
         msg = 'Enter album details'
     return render_template('artist_add_album.html', msg=msg)
 
-#TODO: what happens if that the first time you see the contr. add to artist?
+
+# TODO: what happens if that the first time you see the contr. add to artist?
 @app.route('/dbtify/add_song', methods=['GET', 'POST'])
 def add_song():
     if request.method == 'POST' and 'album_id' in request.form:
@@ -350,6 +379,7 @@ def modify_song():
 
     return render_template('artist_modify_song.html', msg=msg)
 
+
 @app.route('/dbtify/modify_album', methods=['GET', 'POST'])
 def modify_album():
     if request.method == 'POST' and 'album_id' in request.form:
@@ -374,22 +404,49 @@ def modify_album():
         msg = "Please enter album details"
     return render_template('artist_modify_album.html', msg=msg)
 
+
 @app.route('/like_song', methods=['GET', 'POST'])
 def like_song():
     if request.method == 'POST':
+        # Songun likeını artır
         song_id = request.form['likebtn']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        sql = "SELECT no_of_likes FROM songs WHERE id= %s"
-        cursor.execute( "SELECT no_of_likes FROM songs WHERE id= %s",(song_id,))
+        cursor.execute("SELECT no_of_likes FROM songs WHERE id= %s", (song_id,))
         old_likes = int(cursor.fetchone()['no_of_likes'])
         sql = "UPDATE songs SET no_of_likes = %s WHERE id = %s"
-        values = (old_likes+1, song_id)
+        values = (old_likes + 1, song_id)
         cursor.execute(sql, values)
         # Fetch one record and return result
         mysql.connect.commit()
         mysql.connection.commit()
-        sql = "INSERT INTO user_likes (song_id,user_id) VALUES (%s, %s)"
 
+        # artistin likeını artır
+        cursor.execute(
+            "SELECT artists.total_likes,artists.id FROM artists JOIN albums ON albums.artist_id = artists.id JOIN songs ON songs.album_id = albums.id  WHERE songs.id= %s",
+            (song_id,))
+        artist_details = (cursor.fetchone())
+        old_likes = int(artist_details['total_likes'])
+        sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+        values = (old_likes + 1, artist_details['id'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+
+        # contributorun likeı
+        cursor.execute(
+            "SELECT artists.total_likes,artists.id FROM artists JOIN coartists ON coartists.artist_id = artists.id  WHERE coartists.song_id= %s",
+            (song_id,))
+        artist_details = (cursor.fetchone())
+        old_likes = int(artist_details['total_likes'])
+        sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+        values = (old_likes + 1, artist_details['id'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+
+        sql = "INSERT INTO user_likes (song_id,user_id) VALUES (%s, %s)"
         values = (song_id, session['username'])
         cursor.execute(sql, values)
         # Fetch one record and return result
@@ -397,9 +454,28 @@ def like_song():
         mysql.connection.commit()
         cursor.close()
 
-    return render_template('home_listener.html', username=session['username'])
+    return redirect(url_for('home_listener'))
 
 
+@app.route('/others_likes', methods=['GET', 'POST'])
+def others_likes():
+    if request.method == 'POST':
+        user_id = request.form['viewbtn']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            "SELECT songs.title,songs.no_of_likes FROM songs INNER JOIN user_likes ON user_likes.song_id= songs.id WHERE user_likes.user_id = %s;",
+            (user_id,))
+        liked_songs = cursor.fetchall()
+        # Fetch one record and return result
+        cursor.close()
 
+    return render_template('other_listener_likes.html', other=user_id, liked_songs=liked_songs)
+
+@app.route('/rank_artists', methods=['GET', 'POST'])
+def rank_artists():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM artists ORDER BY total_likes DESC;")
+    data = cursor.fetchall()
+    return render_template('listener_popular_artists.html', data=data)
 
 

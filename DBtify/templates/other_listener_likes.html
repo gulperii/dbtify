@@ -1,11 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
 <body class="loggedin">
 <nav class="navtop">
     <div>
@@ -17,26 +17,21 @@
 
 </nav>
 
-		<meta charset="utf-8">
-		<title>Showing All Songs in {{album}}</title>
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
-</body>
+<div class="content">
 
-	</head>
-<body>
-<h2>All Artists</h2>
-<p>Showing all artists in database</p>
-<table border="" cellpadding="5" cellspacing="5">
+     <table border="" cellpadding="20" cellspacing="5" style="float: inside">
+<h2>Liked Songs of {{other}}</h2>
+         <td>Song Title</td>
+    <td>Total Number Of Likes</td>
 
-    <td>Artist Name</td>
-    {% for item in data %}
-<tr>
-    <td>{{item['name']}} {{item['surname']}}</td>
+    {% for item in liked_songs %}
+    <tr>
+        <td>{{item['title']}}</td>
+        <td>{{item['no_of_likes']}}</td>
 
-
-</tr>
-{% endfor %}
+    </tr>
+    {% endfor %}
 </table>
+</div>
 </body>
 </html>

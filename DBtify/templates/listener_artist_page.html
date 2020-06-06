@@ -27,42 +27,49 @@
 
 <body>
 <style>
-.body h2 {
-  	margin: 0;
-  	padding: 25px 0;
-  	font-size: 22px;
-  	border-bottom: 1px solid #e0e0e3;
-  	color: #4a536e;
-}
+    .body h2 {
+        margin: 0;
+        padding: 25px 0;
+        font-size: 22px;
+        border-bottom: 1px solid #e0e0e3;
+        color: #4a536e;
+    }
+
     .body > p table td, .body > div table td {
-	padding: 5px;
-}
-.body > p table td:first-child, .body > div table td:first-child {
-	font-weight: bold;
-	color: #4a536e;
-	padding-right: 15px;
-}
-.body > div p {
-	padding: 5px;
-	margin: 0 0 10px 0;
-}
+        padding: 5px;
+    }
+
+    .body > p table td:first-child, .body > div table td:first-child {
+        font-weight: bold;
+        color: #4a536e;
+        padding-right: 15px;
+    }
+
+    .body > div p {
+        padding: 5px;
+        margin: 0 0 10px 0;
+    }
 </style>
 <h2>Artist Details Page</h2>
 <p>Showing All Songs of {{artist}}!</p>
-<table border="" cellpadding="5" cellspacing="5">
+<table border="1" cellpadding="5" cellspacing="5" style="float: left">
 
     <td>Song Name</td>
+    <td>Album Name</td>
+
     <td>Number of Likes</td>
     {% for item in songs %}
     <tr>
         <td>{{item['title']}}</td>
+        <td>{{item['albums.title']}}</td>
+
         <td>{{item['no_of_likes']}}</td>
-        ...
+
     </tr>
     {% endfor %}
 </table>
 <p>Showing All Albums of {{artist}}!</p>
-<table border="" cellpadding="5" cellspacing="5">
+<table border="1" cellpadding="5" cellspacing="5" style="float:inside">
 
     <td>Album Name</td>
     <td>Genre</td>
@@ -71,6 +78,43 @@
     <tr>
         <td>{{item['id']}}</td>
         <td>{{item['genre']}}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+</table>
+
+<table border="1" cellpadding="5" cellspacing="5" style="float:inside">
+<p>Showing collaborated songs of  {{artist}}!</p>
+
+    <td>Song Title</td>
+    <td>Album Title</td>
+    <td>Collaborated with</td>
+
+
+    {% for item in cosongs %}
+    <tr>
+        <td>{{item['title']}}</td>
+        <td>{{item['albums.title']}}</td>
+        <td>{{item['artist_id']}}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+<p>Showing Top Songs of {{artist}}!</p>
+<table border="1" cellpadding="5" cellspacing="5" style="float:inside">
+
+    <td>Song Title</td>
+    <td>Album Title</td>
+    <td>Likes</td>
+
+
+    {% for item in popular_songs %}
+    <tr>
+        <td>{{item['title']}}</td>
+        <td>{{item['albums.title']}}</td>
+        <td>{{item['no_of_likes']}}</td>
 
     </tr>
     {% endfor %}
