@@ -156,7 +156,7 @@ def show_all_artists():
 @app.route('/show_all_albums')
 def show_all_albums():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT title, artist_id FROM albums")
+    cursor.execute("SELECT title, artist_id,id FROM albums")
     data = cursor.fetchall()
     cursor.close()
     return render_template('all_albums.html', data=data)
@@ -404,6 +404,123 @@ def modify_album():
         msg = "Please enter album details"
     return render_template('artist_modify_album.html', msg=msg)
 
+@app.route('/dbtify/delete_song', methods=['GET','POST'])
+def delete_song():
+    if request.method == 'POST' and 'song_id' in request.form:
+        song_id = request.form['song_id']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT no_of_likes, album_id FROM songs WHERE id = %s', (song_id,))
+        song_data = cursor.fetchone()
+        song_likes = song_data['no_of_likes']
+        album_id = song_data['album_id']
+        cursor.execute('SELECT artist_id FROM albums WHERE id = %s', (album_id,))
+        artist_d = cursor.fetchone()
+        artist_id = artist_d['artist_id']
+        cursor.execute('SELECT total_likes FROM artists WHERE id = %s', (artist_id,))
+        artist_d = cursor.fetchone()
+        artist_likes = artist_d['total_likes']
+        if not song_data:
+            msg = "Wrong song id"
+        elif artist_id!= session['username']:
+            msg = 'This is not your song, you cant delete it'
+        else:
+            # reduce artist likes
+            sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+            values = (artist_likes-song_likes, artist_id)
+            cursor.execute(sql, values)
+            mysql.connect.commit()
+            mysql.connection.commit()
+            #check coarts
+            cursor.execute('SELECT artist_id FROM coartists WHERE song_id = %s', (song_id,))
+            collab = cursor.fetchall()
+            if collab:
+                for c in collab:
+                    cursor.execute('SELECT total_likes FROM artists WHERE id = %s', (c['artist_id'],))
+                    ret = cursor.fetchone()
+                    c_likes = ret['total_likes']
+                    sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+                    values = (c_likes - song_likes, c['artist_id'])
+                    cursor.execute(sql, values)
+                    mysql.connect.commit()
+                    mysql.connection.commit()
+
+
+                cursor.execute('DELETE FROM coartists WHERE song_id = %s', (song_id,))
+                mysql.connection.commit()
+                mysql.connect.commit()
+
+            cursor.execute('DELETE FROM songs WHERE id = %s', (song_id,))
+            mysql.connect.commit()
+            mysql.connection.commit()
+            cursor.close()
+            return redirect(url_for('home_artist'))
+    else:
+        msg = "Enter song details"
+
+    return render_template('artist_delete_song.html', msg=msg)
+
+def delete_album_helper(song_id,artist_id,album_id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT no_of_likes FROM songs WHERE id = %s', (song_id,))
+    song_data = cursor.fetchone()
+    song_likes = song_data['no_of_likes']
+    cursor.execute('SELECT total_likes FROM artists WHERE id = %s', (artist_id,))
+    artist_d = cursor.fetchone()
+    artist_likes = artist_d['total_likes']
+
+    # reduce artist likes
+    sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+    values = (artist_likes - song_likes, artist_id)
+    cursor.execute(sql, values)
+    mysql.connect.commit()
+    mysql.connection.commit()
+
+    # check coarts
+    cursor.execute('SELECT * FROM coartists WHERE song_id = %s', (song_id,))
+    collab = cursor.fetchall()
+    if collab:
+        for c in collab:
+            cursor.execute('SELECT total_likes FROM artists WHERE id = %s', (c['artist_id'],))
+            ret = cursor.fetchone()
+            c_likes = ret['total_likes']
+            sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+            values = (c_likes - song_likes, c['artist_id'])
+            cursor.execute(sql, values)
+            mysql.connect.commit()
+            mysql.connection.commit()
+
+        cursor.execute('DELETE FROM coartists WHERE song_id = %s', (song_id,))
+        mysql.connection.commit()
+        mysql.connect.commit()
+
+    cursor.close()
+
+@app.route('/dbtify/delete_album', methods=['GET','POST'])
+def delete_album():
+    if request.method == 'POST' and 'album_id' in request.form:
+        album_id = request.form['album_id']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT artist_id FROM albums WHERE id = %s', (album_id,))
+        artist_d = cursor.fetchone()
+
+        if not artist_d:
+            msg = "Wrong song id"
+        elif artist_d['artist_id']!= session['username']:
+            msg = 'This is not your album, you cant delete it'
+        else:
+            cursor.execute('SELECT id FROM songs WHERE album_id = %s', (album_id,))
+            songs = cursor.fetchall()
+            for item in songs:
+                delete_album_helper(item['id'],artist_d['artist_id'],album_id)
+
+            cursor.execute('DELETE FROM albums WHERE id = %s', (album_id,))
+            mysql.connection.commit()
+            mysql.connect.commit()
+            return redirect(url_for('home_artist'))
+    else:
+        msg = "Enter album details"
+
+    return render_template('artist_delete_album.html', msg=msg)
 
 @app.route('/like_song', methods=['GET', 'POST'])
 def like_song():
@@ -478,4 +595,72 @@ def rank_artists():
     data = cursor.fetchall()
     return render_template('listener_popular_artists.html', data=data)
 
+
+
+@app.route('/like_album', methods=['GET', 'POST'])
+def like_album():
+    if request.method == 'POST':
+        # Songun likeını artır
+        album_id = request.form['likebtn']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT no_of_likes FROM songs WHERE id= %s", (song_id,))
+        old_likes = int(cursor.fetchone()['no_of_likes'])
+        sql = "UPDATE songs SET no_of_likes = %s WHERE id = %s"
+        values = (old_likes + 1, song_id)
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+
+        # artistin likeını artır
+        cursor.execute(
+            "SELECT artists.total_likes,artists.id FROM artists JOIN albums ON albums.artist_id = artists.id JOIN songs ON songs.album_id = albums.id  WHERE songs.id= %s",
+            (song_id,))
+        artist_details = (cursor.fetchone())
+        old_likes = int(artist_details['total_likes'])
+        sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+        values = (old_likes + 1, artist_details['id'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+
+        # contributorun likeı
+        cursor.execute(
+            "SELECT artists.total_likes,artists.id FROM artists JOIN coartists ON coartists.artist_id = artists.id  WHERE coartists.song_id= %s",
+            (song_id,))
+        artist_details = (cursor.fetchone())
+        old_likes = int(artist_details['total_likes'])
+        sql = "UPDATE artists SET total_likes = %s WHERE id = %s"
+        values = (old_likes + 1, artist_details['id'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+
+        sql = "INSERT INTO user_likes (song_id,user_id) VALUES (%s, %s)"
+        values = (song_id, session['username'])
+        cursor.execute(sql, values)
+        # Fetch one record and return result
+        mysql.connect.commit()
+        mysql.connection.commit()
+        cursor.close()
+
+    return redirect(url_for('home_listener'))
+
+@app.route('/show_collab', methods=['GET','POST'])
+def show_collab():
+    if request.method == 'POST' and 'artist_name' in request.form:
+        artist_name = request.form['artist_name']
+        artist_surname = request.form['artist_surname']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        result = cursor.callproc("getCollaborators", args=(artist_name,artist_surname))
+        mresult = cursor.fetchall()
+        cursor.close()
+        data = []
+        for item in mresult:
+            data.append(item['artist_id'])
+        return render_template('listener_show_collab.html', data=data, name=artist_name + " "+ artist_surname,)
+
+    return render_template('listener_search_collab.html')
 

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Modify Song</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+</head>
+<body>
+<div class="login">
+    <h1>Modify Song</h1>
+
+    <form action="{{ url_for('delete_song') }}" method="post">
+        <label for="song_id">
+            <i class="fas fa-user"></i>
+        </label>
+        <input type="text" name="song_id" placeholder="Id of the song you want to delete" id="song_id" required>
+        <div class="msg">{{msg}}</div>
+        <input type="submit" value="Delete Song">
+    </form>
+</div>
+</body>
+</html>

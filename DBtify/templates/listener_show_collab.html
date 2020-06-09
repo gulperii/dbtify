@@ -1,5 +1,7 @@
 <!doctype html>
 <html>
+
+
 <head>
     <meta charset="utf-8">
     <title>{% block title %}{% endblock %}</title>
@@ -16,33 +18,26 @@
 
 </nav>
 
-<meta charset="utf-8">
-<title>Showing All Songs in {{album}}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+		<meta charset="utf-8">
+		<title>Showing Collaborations of {{name}}</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
 </body>
 
-</head>
+	</head>
 
 <body>
-<h2>All Albums</h2>
-<p>Showing all albums in database</p>
+    <p>Showing Collaborations of {{name}}!</p>
+
 <table border="" cellpadding="5" cellspacing="5">
-    <td>Album Id</td>
-    <td>Album Name</td>
-    <td>Artist</td>
+
+    <td>Artist Name</td>
     {% for item in data %}
-    <tr>
-        <td>{{item['id']}}</td>
-        <td>{{item['title']}}</td>
-        <td>{{item['artist_id']}}</td>
-        <td>
-            <form action="/like_album" method="post">
-                <button name="likebtn" id="likebtn" value="{{item['id']}}" type="submit">Like</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
+<tr>
+    <td>{{item}}</td>
+
+</tr>
+{% endfor %}
 </table>
 </body>
 </html>
