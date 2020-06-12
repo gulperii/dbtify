@@ -33,12 +33,15 @@
 <table border="" cellpadding="5" cellspacing="5">
 
     <td>Song Name</td>
-    <td>Artist</td>
+    <td>Number of Likes</td>
+        <td>Album</td>
+
     {% for item in data %}
 <tr>
     <td>{{item['title']}}</td>
     <td>{{item['no_of_likes']}}</td>
-    ...
+        <td>{{item['albums.title']}}</td>
+
 </tr>
 {% endfor %}
 </table>

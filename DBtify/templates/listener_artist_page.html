@@ -51,8 +51,9 @@
     }
 </style>
 <h2>Artist Details Page</h2>
-<p>Showing All Songs of {{artist}}!</p>
+
 <table border="1" cellpadding="5" cellspacing="5" style="float: left">
+<tr><th colspan="2">Showing All Songs of {{artist}}!</th></tr>
 
     <td>Song Name</td>
     <td>Album Name</td>
@@ -68,16 +69,19 @@
     </tr>
     {% endfor %}
 </table>
-<p>Showing All Albums of {{artist}}!</p>
+
 <table border="1" cellpadding="5" cellspacing="5" style="float:inside">
+<tr><th colspan="3">Showing All Albums of {{artist}}!</th></tr>
 
     <td>Album Name</td>
     <td>Genre</td>
+    <td>Album Likes</td>
 
     {% for item in albums %}
     <tr>
-        <td>{{item['id']}}</td>
+        <td>{{item['title']}}</td>
         <td>{{item['genre']}}</td>
+        <td>{{item['no_of_likes']}}</td>
 
     </tr>
     {% endfor %}
@@ -85,7 +89,7 @@
 </table>
 
 <table border="1" cellpadding="5" cellspacing="5" style="float:inside">
-<p>Showing collaborated songs of  {{artist}}!</p>
+<tr><th colspan="3">Showing {{artist}}'s external collaborations!</th></tr>
 
     <td>Song Title</td>
     <td>Album Title</td>
@@ -102,8 +106,8 @@
     {% endfor %}
 </table>
 
-<p>Showing Top Songs of {{artist}}!</p>
 <table border="1" cellpadding="5" cellspacing="5" style="float:inside">
+<tr><th colspan="3">Showing Top Songs of {{artist}}!</th></tr>
 
     <td>Song Title</td>
     <td>Album Title</td>

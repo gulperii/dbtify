@@ -32,14 +32,18 @@
     <td>Song Id</td>
     <td>Song Name</td>
     <td>Album Name</td>
+    <td>Genre</td>
+
     {% for item in data %}
     <tr>
         <td>{{item['id']}}</td>
         <td>{{item['title']}}</td>
-        <td>{{item['album_id']}}</td>
+        <td>{{item['albums.title']}}</td>
+        <td>{{item['genre']}}</td>
+
         <td>
             <form action="/like_song" method="post">
-                <button name= "likebtn" id="likebtn" value = "{{item['id']}}" type="submit">Like</button>
+                <button name="likebtn" id="likebtn" value="{{item['id']}}" type="submit">Like</button>
             </form>
         </td>
     </tr>

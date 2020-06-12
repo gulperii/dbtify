@@ -32,9 +32,15 @@
 <table border="" cellpadding="5" cellspacing="5">
 
     <td>Artist Name</td>
+    <td>Song Id</td>
+    <td>Song Name</td>
+
+
     {% for item in data %}
 <tr>
-    <td>{{item}}</td>
+    <td>{{item[0]}}</td>
+    <td>{{item[1]}}</td>
+    <td>{{item[2]}}</td>
 
 </tr>
 {% endfor %}

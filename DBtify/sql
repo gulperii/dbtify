@@ -1,22 +1,5 @@
-CREATE TABLE `dbtify`.`listeners` (
-  `username` INT NOT NULL,
-  `email` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`username`),
-  UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE,
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
 
-CREATE TABLE `dbtify`.`album` (
-  `id` INT NOT NULL,
-  `genre` VARCHAR(45) NOT NULL,
-  `title` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE);
-
-
-  INSERT INTO `dbtify`.`accounts` (`username`, `password`) VALUES ('Araba', 'Car');
-
-
-STORED PROCEDURE:
+SQL CODE FOR STORED PROCEDURE:
 DELIMITER $$
 
 CREATE PROCEDURE getCollaborators(
@@ -42,23 +25,9 @@ DELIMITER ;
 CALL getCollaborators('Taylor','Swift')
 
 
-DELETE ALBUM TRIGGER:
-DROP TRIGGER IF EXISTS `dbtify`.`albums_BEFORE_DELETE`;
-
-DELIMITER $$
-USE `dbtify`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `dbtify`.`albums_BEFORE_DELETE` BEFORE DELETE ON `albums` FOR EACH ROW
-BEGIN
-DELETE FROM `dbtify`.`songs` WHERE (`album_id` = OLD.id);
-
-END$$
-DELIMITER ;
 
 
-
-DELETE ALBUM TRİGGERI
-
-
+DELETE ALBUM TRIGGERI:
 USE `dbtify`;
 
 DELIMITER $$
@@ -76,3 +45,18 @@ DELETE FROM `dbtify`.`songs` WHERE (`album_id` = OLD.id);
 
 END$$
 DELIMITER ;
+
+
+
+
+
+
+
+DELETE SONG TRIGGER:
+
+CREATE DEFINER=`root`@`localhost` TRIGGER `songs_AFTER_DELETE` AFTER DELETE ON `songs` FOR EACH ROW
+
+BEGIN
+DELETE FROM user_likes WHERE song_id = old.id;
+
+END
